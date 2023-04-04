@@ -14,7 +14,13 @@ local DataSystem = require(Systems.DataSystem)
 local PaycheckSystem = require(Systems.PaycheckSystem)
 
 --\\ Server Code //--
-Players.PlayerAdded:Connect(function(player)
+Players.PlayerAdded:Connect(function(player: Player)
     DataSystem.PlayerAdded(player)
     PaycheckSystem.PlayerAdded(player)
 end)
+
+Players.PlayerRemoving:Connect(function(player: Player)
+    DataSystem.PlayerRemoved(player)
+end)
+
+PaycheckSystem.Init()

@@ -15,6 +15,7 @@ local Modules: Folder = ReplicatedStorage:WaitForChild("Modules")
 local Types: ModuleScript = require(Modules.Types)
 
 --\\ Types //--
+type PlayerData = Types.PlayerData
 type PaycheckMachine = Types.PaycheckMachine
 
 --\\ Variables //--
@@ -24,48 +25,69 @@ local paycheckMachines: {PaycheckMachine} = paycheckMachineFolder:GetChildren()
 -- Remotes
 local Remotes: Folder = ReplicatedStorage:WaitForChild("Remotes")
 local RequestPaycheck: RemoteFunction = Remotes.RequestPaycheck
-
-local janitor: typeof(Janitor) = Janitor.new()
+local UpdatePaycheckMachines: RemoteEvent = Remotes.UpdatePaycheckMachines
 
 local debounce = 0
 
 --\\ Module Code //--
 local PaycheckMachineHandler = {}
+PaycheckMachineHandler.janitor = Janitor.new()
 
-local function addTouchListener(pad: BasePart)
+function PaycheckMachineHandler.AddTouchListener(paycheckMachine: Model)
     -- Prohibit continuation without necessary information.
+    if not ( paycheckMachine ) then return end
+
+    -- Find pad
+    local pad: BasePart = paycheckMachine.PadComponents:FindFirstChild("Pad")
     if not ( pad ) then return end
 
-    janitor:Add(pad.Touched:Connect(function()
+    PaycheckMachineHandler.janitor:Add(pad.Touched:Connect(function()
         local timeNow = workspace:GetServerTimeNow() -- Save the number, no need to call function again later
         if ( (timeNow - debounce) < 1 ) then
             return false
         end
-        print("BRUV")
+
+        -- Tell the server for payout
+        RequestPaycheck:InvokeServer()
+
         debounce = timeNow
     end))
 end
 
-local function addAttributeListener(moneyDisplay: BasePart)
+function PaycheckMachineHandler.UpdatePaycheckDisplay(paycheckMachine: PaycheckMachine, amount: number): nil
     -- Prohibit continuation without necessary information.
-    if not ( moneyDisplay ) then return end
+    if not ( paycheckMachine ) then return end
 
-    janitor:Add(moneyDisplay:GetAttributeChangedSignal("Amount"):Connect(function()
-        local amount: number = moneyDisplay:GetAttribute("Amount")
-        local moneyLabel: TextLabel = moneyDisplay:FindFirstChild("MoneyLabel", true)
-        moneyLabel.Text = amount -- No need to convert to string when setting text
-    end))
+    -- Find Money Label
+    local moneyLabel: BasePart = paycheckMachine:FindFirstChild("MoneyLabel", true)
+    if not ( moneyLabel ) then return end
+
+    -- Set Money Label's Text
+    moneyLabel.Text = amount -- No need to convert to string when setting text
 end
 
+-- Initialize module code
 function PaycheckMachineHandler.Init()
-    for _, paycheckMachine in ipairs(paycheckMachines) do
-        local pad: BasePart = paycheckMachine.PadComponents:FindFirstChild("Pad")
-        local MoneyInfo: BasePart = paycheckMachine:FindFirstChild("Money_Info_Text")
-        if not ( pad and MoneyInfo ) then return end
+    local function foreachMachine(funcName: string, ...)
+        -- Prohibit continuation without necessary information.
+        if not ( funcName ) then return end
 
-        addTouchListener(pad)
-        addAttributeListener(MoneyInfo)
+        -- Run for loop for paycheck machines.
+        for _, paycheckMachine: PaycheckMachine in ipairs(paycheckMachines) do
+            -- Run Machine Function
+            PaycheckMachineHandler[funcName](paycheckMachine, ...)
+        end
     end
+
+    -- Setup listeners for paycheck machine interaction
+    foreachMachine("AddTouchListener")
+
+    -- Listen for paycheck machine updates
+    PaycheckMachineHandler.janitor:Add(UpdatePaycheckMachines.OnClientEvent:Connect(function(amount: number)
+        -- Prohibit continuation without necessary information.
+        if not ( amount ) then return end
+        foreachMachine("UpdatePaycheckDisplay", amount)
+    end))
 end
 
 return PaycheckMachineHandler
