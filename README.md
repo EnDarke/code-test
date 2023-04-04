@@ -30,3 +30,6 @@
 ## Client
 
 ### Paycheck Machines
+#### Changes Implemented:
+- Storing the debounce time for a more accurate time estimate, as well as not needing to call for time again.
+-
