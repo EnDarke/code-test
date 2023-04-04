@@ -1,0 +1,59 @@
+{
+  "name": "code-test",
+  "servePlaceIds":[0, 12994069771],
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedFirst": {
+      "$className": "ReplicatedFirst",
+      "$ignoreUnknownInstances": true,
+      "$path": "src/ReplicatedFirst"
+    },
+
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "$ignoreUnknownInstances": true,
+
+      "Modules": {
+          "$path": "src/ReplicatedStorage"
+      },
+      "Packages": {
+        "$path": "Packages"
+      }
+    },
+
+    "ServerScriptService": {
+      "$className": "ServerScriptService",
+      "$ignoreUnknownInstances": true,
+
+      "Game": {
+        "$path": "src/ServerScriptService"
+      }
+    },
+
+    "Chat": {
+      "$className": "Chat",
+      "$ignoreUnknownInstances": true,
+      "$path": "src/Chat"
+    },
+
+    "StarterPlayer": {
+      "$className": "StarterPlayer",
+      
+      "StarterCharacterScripts": {
+        "$className": "StarterCharacterScripts",
+        "$ignoreUnknownInstances": true,
+        "$path": "src/StarterCharacterScripts"
+      },
+
+      "StarterPlayerScripts": {
+        "$className": "StarterPlayerScripts",
+        "$ignoreUnknownInstances": true,
+        
+        "Game": {
+          "$path": "src/StarterPlayerScripts"
+        }
+      },
+      "$ignoreUnknownInstances": true
+    }
+  }
+}
