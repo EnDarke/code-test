@@ -11,26 +11,26 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Packages = ReplicatedStorage:WaitForChild("Packages")
 local Janitor = require(Packages.Janitor)
 
---\\ Variables //--
+--\\ Player //--
 local Player: Player = Players.LocalPlayer
 local PlayerGui: PlayerGui = Player.PlayerGui
 
--- Declaring remotes
+--\\ Remotes //--
 local Remotes: Folder = ReplicatedStorage:WaitForChild("Remotes")
 local UpdateUI: RemoteEvent = Remotes.UpdateUI
 local RequestCurrentMoney: RemoteFunction = Remotes.RequestCurrentMoney
 
--- Declaring ui
+--\\ User Interface //--
 local MoneyGui: ScreenGui = PlayerGui:WaitForChild("MoneyDisplay")
 local MoneyFrame: Frame = MoneyGui.MainFrame
 local Label: TextLabel = MoneyFrame.Label
 
 --\\ Module Code //--
 local UserInterfaceHandler = {}
-UserInterfaceHandler.janitor = Janitor.new() -- Added to UserInterfaceHandler in case of use to cleanup janitor from external code
+UserInterfaceHandler._janitor = Janitor.new()
 
 -- Initialize module code
-function UserInterfaceHandler.Init()
+function UserInterfaceHandler.Init(): nil
     -- Local Functions
     local function setPlayerMoney(amount: number)
         if not ( amount ) then return end
@@ -41,7 +41,7 @@ function UserInterfaceHandler.Init()
     setPlayerMoney(RequestCurrentMoney:InvokeServer())
 
     -- UpdateUI Listener
-    UserInterfaceHandler.janitor:Add(UpdateUI.OnClientEvent:Connect(function(dataType: string, value: any)
+    UserInterfaceHandler._janitor:Add(UpdateUI.OnClientEvent:Connect(function(dataType: string, value: any)
         if not ( dataType and value ) then return end
 
         if ( dataType == "Money" ) then

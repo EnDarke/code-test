@@ -7,18 +7,48 @@ local Parent = script.Parent
 
 --\\ Services //--
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 --\\ Handlers //--
 local Handlers: Folder = Parent.Handlers
-local PaycheckMachineHandler = require(Handlers.PaycheckMachineHandler)
-local UserInterfaceHandler = require(Handlers.UserInterfaceHandler)
+
+--\\ Modules //--
+local Modules = ReplicatedStorage.Modules
+local Types = Modules.Types
+
+--\\ Types //--
+type Module = Types.Module
 
 --\\ Variables //--
 local Player: Player = Players.LocalPlayer
 
+--\\ Client Setup //--
+local ClientHandlers: { [string]: Module } = {}
+
+--\\ Client Code //--
+function foreachModule(modules: {}, funcName: string, ...)
+    for name, module: ModuleScript | Module in pairs(modules) do
+        -- Check if the module is already required
+        if ( type(module) == "table" ) then
+            -- We check for funcName here because it only is used here
+            -- return will fully close function so it still only checks once before closing
+            if not ( funcName ) then return end
+            if not ( ClientHandlers[name] ) then continue end
+            if not ( ClientHandlers[name][funcName] ) then continue end
+
+            -- Run module function
+            ClientHandlers[name][funcName](...)
+        elseif ( module:IsA("ModuleScript") ) then
+            -- Setup module
+            ClientHandlers[module.Name] = require(module)
+            ClientHandlers[module.Name].Init()
+        end
+    end
+end
+
 function init()
-    PaycheckMachineHandler.Init()
-    UserInterfaceHandler.Init()
+    -- Instantiate modules
+    foreachModule(Handlers:GetChildren())
 end
 
 -- Wait for player's data to load

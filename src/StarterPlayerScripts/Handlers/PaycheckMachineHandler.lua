@@ -5,6 +5,7 @@
 
 --\\ Services //--
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local CollectionService = game:GetService("CollectionService")
 
 --\\ Packages //--
 local Packages: Folder = ReplicatedStorage:WaitForChild("Packages")
@@ -12,48 +13,39 @@ local Janitor = require(Packages.Janitor)
 
 --\\ Modules //--
 local Modules: Folder = ReplicatedStorage:WaitForChild("Modules")
-local Types: ModuleScript = require(Modules.Types)
+local Types: ModuleScript = Modules.Types
 
 --\\ Types //--
 type PlayerData = Types.PlayerData
 type PaycheckMachine = Types.PaycheckMachine
 
---\\ Variables //--
-local paycheckMachineFolder: Folder = workspace.PaycheckMachines
-local paycheckMachines: {PaycheckMachine} = paycheckMachineFolder:GetChildren()
-
--- Remotes
+--\\ Remotes //--
 local Remotes: Folder = ReplicatedStorage:WaitForChild("Remotes")
-local RequestPaycheck: RemoteFunction = Remotes.RequestPaycheck
 local UpdatePaycheckMachines: RemoteEvent = Remotes.UpdatePaycheckMachines
+local RequestPlayerData: RemoteFunction = Remotes.RequestPlayerData
 
-local debounce = 0
+--\\ Assets //--
+local scriptables: Folder = workspace:WaitForChild("Scriptables")
+local plotsFolder: Folder = scriptables.Plots
 
 --\\ Module Code //--
 local PaycheckMachineHandler = {}
-PaycheckMachineHandler.janitor = Janitor.new()
+PaycheckMachineHandler._janitor = Janitor.new()
 
-function PaycheckMachineHandler.AddTouchListener(paycheckMachine: Model)
+-- Used to loop through paycheck machines to run a function
+function PaycheckMachineHandler.ForEachMachine(paycheckMachines: { PaycheckMachine }, funcName: string, ...): nil
     -- Prohibit continuation without necessary information.
-    if not ( paycheckMachine ) then return end
+    if not ( funcName ) then return end
+    if not ( PaycheckMachineHandler[funcName] ) then return end
 
-    -- Find pad
-    local pad: BasePart = paycheckMachine.PadComponents:FindFirstChild("Pad")
-    if not ( pad ) then return end
-
-    PaycheckMachineHandler.janitor:Add(pad.Touched:Connect(function()
-        local timeNow = workspace:GetServerTimeNow() -- Save the number, no need to call function again later
-        if ( (timeNow - debounce) < 1 ) then
-            return false
-        end
-
-        -- Tell the server for payout
-        RequestPaycheck:InvokeServer()
-
-        debounce = timeNow
-    end))
+    -- Run for loop for paycheck machines.
+    for _, paycheckMachine: PaycheckMachine in ipairs(paycheckMachines) do
+        -- Run Machine Function
+        PaycheckMachineHandler[funcName](paycheckMachine, ...)
+    end
 end
 
+-- Updates paycheck machine display
 function PaycheckMachineHandler.UpdatePaycheckDisplay(paycheckMachine: PaycheckMachine, amount: number): nil
     -- Prohibit continuation without necessary information.
     if not ( paycheckMachine ) then return end
@@ -67,26 +59,23 @@ function PaycheckMachineHandler.UpdatePaycheckDisplay(paycheckMachine: PaycheckM
 end
 
 -- Initialize module code
-function PaycheckMachineHandler.Init()
-    local function foreachMachine(funcName: string, ...)
-        -- Prohibit continuation without necessary information.
-        if not ( funcName ) then return end
-
-        -- Run for loop for paycheck machines.
-        for _, paycheckMachine: PaycheckMachine in ipairs(paycheckMachines) do
-            -- Run Machine Function
-            PaycheckMachineHandler[funcName](paycheckMachine, ...)
-        end
-    end
-
-    -- Setup listeners for paycheck machine interaction
-    foreachMachine("AddTouchListener")
-
+function PaycheckMachineHandler.Init(): nil
     -- Listen for paycheck machine updates
-    PaycheckMachineHandler.janitor:Add(UpdatePaycheckMachines.OnClientEvent:Connect(function(amount: number)
+    PaycheckMachineHandler._janitor:Add(UpdatePaycheckMachines.OnClientEvent:Connect(function(amount: number)
         -- Prohibit continuation without necessary information.
         if not ( amount ) then return end
-        foreachMachine("UpdatePaycheckDisplay", amount)
+
+        -- Find player's plot
+        local playerPlotId: string = RequestPlayerData:InvokeServer(true, "Plot")
+        if not ( playerPlotId ) then return end
+        local playerPlot: Model = plotsFolder:FindFirstChild(playerPlotId)
+        if not ( playerPlot ) then return end
+
+        -- Get all paycheck machines
+        local paycheckMachines: { PaycheckMachine } = playerPlot.PaycheckMachines:GetChildren()
+
+        -- Update paycheck displays
+        PaycheckMachineHandler.ForEachMachine(paycheckMachines, "UpdatePaycheckDisplay", amount)
     end))
 end
 

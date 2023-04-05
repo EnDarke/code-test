@@ -7,20 +7,56 @@ local Parent = script.Parent
 
 --\\ Services //--
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 --\\ Systems //--
 local Systems: Folder = Parent.Systems
-local DataSystem = require(Systems.DataSystem)
-local PaycheckSystem = require(Systems.PaycheckSystem)
+
+--\\ Replicated Modules //--
+local ReplicatedModules = ReplicatedStorage.Modules
+local Types = ReplicatedModules.Types
+
+--\\ Types //--
+type Module = Types.Module
+
+--\\ Server Setup //--
+local ServerSystems: { [string]: Module } = {}
 
 --\\ Server Code //--
-Players.PlayerAdded:Connect(function(player: Player)
-    DataSystem.PlayerAdded(player)
-    PaycheckSystem.PlayerAdded(player)
-end)
+function foreachModule(modules: {}, funcName: string, ...)
+    for name, module: ModuleScript | Module in pairs(modules) do
+        -- Check if the module is already required
+        if ( type(module) == "table" ) then
+            -- We check for funcName here because it only is used here
+            -- return will fully close function so it still only checks once before closing
+            if not ( funcName ) then return end
+            if not ( ServerSystems[name] ) then continue end
+            if not ( ServerSystems[name][funcName] ) then continue end
 
-Players.PlayerRemoving:Connect(function(player: Player)
-    DataSystem.PlayerRemoved(player)
-end)
+            -- Run module function
+            ServerSystems[name][funcName](...)
+        elseif ( module:IsA("ModuleScript") ) then
+            -- Setup module
+            ServerSystems[module.Name] = require(module)
+            ServerSystems[module.Name].Init()
+        end
+    end
+end
 
-PaycheckSystem.Init()
+function init()
+    -- Instantiate modules
+    foreachModule(Systems:GetChildren())
+
+    -- Apply player listeners
+    for _, player: Player in ipairs(Players:GetPlayers()) do
+        foreachModule(ServerSystems, "PlayerAdded")
+    end
+    Players.PlayerAdded:Connect(function(player: Player)
+        foreachModule(ServerSystems, "PlayerAdded", player)
+    end)
+    Players.PlayerRemoving:Connect(function(player: Player)
+        foreachModule(ServerSystems, "PlayerRemoving", player)
+    end)
+end
+
+init()
