@@ -3,6 +3,8 @@
 -- Author(s): Voldex Code Test, Alex/EnDarke
 -- Description: Handles UserInterface updating
 
+local Parent = script.Parent
+
 --\\ Services //--
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -10,6 +12,9 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 --\\ Packages //--
 local Packages = ReplicatedStorage:WaitForChild("Packages")
 local Janitor = require(Packages.Janitor)
+
+--\\ Handlers //--
+local PaycheckMachineHandler: ModuleScript = require(Parent.PaycheckMachineHandler)
 
 --\\ Player //--
 local Player: Player = Players.LocalPlayer
@@ -29,24 +34,30 @@ local Label: TextLabel = MoneyFrame.Label
 local UserInterfaceHandler = {}
 UserInterfaceHandler._janitor = Janitor.new()
 
+-- Updates paycheck withdrawal amount
+function UserInterfaceHandler.PaycheckWithdrawalAmount(amount: number)
+    -- Prohibit continuation without necessary information.
+    if not ( amount ) then return end
+    PaycheckMachineHandler.OnUpdateUIEvent(amount)
+end
+
+function UserInterfaceHandler.Money(amount: number)
+    -- Prohibit continuation without necessary information.
+    if not ( amount ) then return end
+    Label.Text = amount
+end
+
 -- Initialize module code
 function UserInterfaceHandler.Init(): nil
-    -- Local Functions
-    local function setPlayerMoney(amount: number)
-        if not ( amount ) then return end
-        Label.Text = amount -- Setting text natively converts to string from number
-    end
+    -- print("UserInterfaceHandler Initiated!")
 
     -- Grab player's current funds
-    setPlayerMoney(RequestCurrentMoney:InvokeServer())
+    UserInterfaceHandler.Money(RequestCurrentMoney:InvokeServer())
 
     -- UpdateUI Listener
-    UserInterfaceHandler._janitor:Add(UpdateUI.OnClientEvent:Connect(function(dataType: string, value: any)
-        if not ( dataType and value ) then return end
-
-        if ( dataType == "Money" ) then
-            setPlayerMoney(value)
-        end
+    UserInterfaceHandler._janitor:Add(UpdateUI.OnClientEvent:Connect(function(dataType: string, ...)
+        if not ( dataType and ... ) then return end
+        UserInterfaceHandler[dataType](...)
     end))
 end
 

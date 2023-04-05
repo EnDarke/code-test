@@ -58,25 +58,26 @@ function PaycheckMachineHandler.UpdatePaycheckDisplay(paycheckMachine: PaycheckM
     moneyLabel.Text = amount -- No need to convert to string when setting text
 end
 
+function PaycheckMachineHandler.OnUpdateUIEvent(amount: number): nil
+    -- Prohibit continuation without necessary information.
+    if not ( amount ) then return end
+
+    -- Find player's plot
+    local playerPlotId: string = RequestPlayerData:InvokeServer(true, "Plot")
+    if not ( playerPlotId ) then return end
+    local playerPlot: Model = plotsFolder:FindFirstChild(playerPlotId)
+    if not ( playerPlot ) then return end
+
+    -- Get all paycheck machines
+    local paycheckMachines: { PaycheckMachine } = playerPlot.PaycheckMachines:GetChildren()
+
+    -- Update paycheck displays
+    PaycheckMachineHandler.ForEachMachine(paycheckMachines, "UpdatePaycheckDisplay", amount)
+end
+
 -- Initialize module code
 function PaycheckMachineHandler.Init(): nil
-    -- Listen for paycheck machine updates
-    PaycheckMachineHandler._janitor:Add(UpdatePaycheckMachines.OnClientEvent:Connect(function(amount: number)
-        -- Prohibit continuation without necessary information.
-        if not ( amount ) then return end
-
-        -- Find player's plot
-        local playerPlotId: string = RequestPlayerData:InvokeServer(true, "Plot")
-        if not ( playerPlotId ) then return end
-        local playerPlot: Model = plotsFolder:FindFirstChild(playerPlotId)
-        if not ( playerPlot ) then return end
-
-        -- Get all paycheck machines
-        local paycheckMachines: { PaycheckMachine } = playerPlot.PaycheckMachines:GetChildren()
-
-        -- Update paycheck displays
-        PaycheckMachineHandler.ForEachMachine(paycheckMachines, "UpdatePaycheckDisplay", amount)
-    end))
+    -- print("PaycheckMachineHandler Initiated!")
 end
 
 return PaycheckMachineHandler

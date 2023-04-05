@@ -37,6 +37,7 @@ local RequestPlayerData: RemoteFunction = Remotes.RequestPlayerData
 local PlayerStore: DataStore = DataStoreService:GetDataStore("DEMO_PlayerStore")
 local ServerData: { [string]: PlayerData } = {}
 local TemporaryData: { [string]: TemporaryData } = {}
+local ClientDataSharingWhitelist: { string } = { "Money", "PaycheckWithdrawalAmount" }
 
 --\\ Assets //--
 local scriptables: Folder = workspace.Scriptables
@@ -89,8 +90,10 @@ function DataSystem:Set(player: Player, isTemporaryData: boolean, dataType: stri
     -- Set data type
     playerData[dataType] = value
 
-    -- Let player know!
-    UpdateUI:FireClient(player, dataType, value)
+    -- Let the player know!
+    if ( table.find(ClientDataSharingWhitelist, dataType) ) then
+        UpdateUI:FireClient(player, dataType, value)
+    end
 
     return true
 end
