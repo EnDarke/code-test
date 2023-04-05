@@ -4,6 +4,11 @@
 ### Initial Thoughts
 - Game seems to only have ~200 lines of code total. A lot of the code is quite messy, a lot of vulnerabilities regarding code sequencing and client telling server what to do. Most systems may need to be refactored.
 
+### Final Thoughts
+- While I made quite a large some of changes, almost rewriting a lot of the code, I also reused much of the already set in stone codebase in terms of how pads and paycheck machines will function, where their data is stored, etc.
+- I tried not to make too drastic changes from the base product as it deemed to be highly inefficient and would've made this process take much longer.
+- Overall, I think the game is far more clean, far more secure, and far more expandable. As expandability is also a highly important aspect to game development.
+
 ### General
 #### Changes Implemented:
 - Cleaned up codebase to be structured in a much more collective manner.
@@ -15,6 +20,8 @@
 #### Changes Implemented:
 - Changed the Money Display ScreenGui.ResetOnSpawn from true to false. We don't want ScreenGui to get reset when dying and have to deal with object missing bugs!
 - Added Janitor objects for script connection cleanup.
+- Pads now get billboardgui that will function correctly based off attributes given!
+- Pads now get completely deleted so there isn't any left over objects in the workspace.
 
 ## Server
 
