@@ -95,3 +95,8 @@ I'd like to give special thanks to Ruizukun and Roblox for creating the 2 packag
 #### Changes Implemented:
 - Added a PlaySFXFromName remote to send a signal for the client to play a certain song from the server.
 - Created a simple working sound system for sound effects to be played and removed, nothing too in-depth.
+
+## Things I Would Change About The Codebase I Implemented
+#### Changes I'd Make:
+- More in-depth systems rather than short-end, not as customizable based systems where we have unlimited posibility with what goes on. (e.g. tool system being a simple tool giver and roblox backpack versus player backpack with custom equips and custom tool usage events).
+- Having error handling when it comes to sanity checks. If an object couldn't be found on a sanity check, there should be some sort of warning system or notification. Or even error analytics for us to track to know how many times it hits a breaking point on that side of things. (e.g. if not ( playerMoney ) then return end should be replaced with if not ( playerMoney ) then warn("Player Money could not be found") or some other in-depth warning system).
