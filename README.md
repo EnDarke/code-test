@@ -25,6 +25,7 @@ I'd like to give special thanks to Ruizukun and Roblox for creating the 2 packag
 #### Build Tool
 - I thought this was a pretty funny idea the fact that you could click anywhere to make a building appear there haha!
 - Buildings that are placed are set to random as it makes it feel more like magic in a way of the magic isn't always perfect.
+- SEEABLE FROM MULTIPLAYER!
 
 #### My thoughts on these additions
 - While I could've gone a more custom and very likely more secure system by creating my own tool system, I feel as though this keeps it simple and within the time limit allocations.
