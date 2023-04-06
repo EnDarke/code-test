@@ -42,6 +42,7 @@ local ClientDataSharingWhitelist: { string } = { "Money", "PaycheckWithdrawalAmo
 --\\ Assets //--
 local scriptables: Folder = workspace.Scriptables
 local plotSpawns: Folder = scriptables.PlotSpawns
+local plotsFolder: Folder = scriptables.Plots
 
 --\\ Local Utility Functions //--
 local function createDataKey(userId: number)
@@ -55,7 +56,9 @@ local DataSystem: Module = {}
 function DataSystem:Get(player: Player, isTemporaryData: boolean, specific: any): PlayerData | nil
     -- Prohibit continuation without necessary information.
     if not ( player ) then return end
-    if not ( player:GetAttribute("DataLoaded") ) then return end
+    if not ( player:GetAttribute("DataLoaded") ) then
+        player:GetAttributeChangedSignal("DataLoaded"):Wait()
+    end
 
     -- Local Variables
     local userId: number = player.UserId
@@ -76,7 +79,9 @@ end
 function DataSystem:Set(player: Player, isTemporaryData: boolean, dataType: string, value: any, add: boolean): boolean | nil
     -- Prohibit continuation without necessary information.
     if not ( player and dataType and value ) then return end
-    if not ( player:GetAttribute("DataLoaded") ) then return end
+    if not ( player:GetAttribute("DataLoaded") ) then
+        player:GetAttributeChangedSignal("DataLoaded"):Wait()
+    end
 
     -- Get player data, check for player data.
     local playerData: PlayerData | TemporaryData = DataSystem:Get(player, isTemporaryData)
@@ -100,31 +105,33 @@ end
 
 -- Runs when player is added
 function DataSystem.PlayerAdded(player: Player): boolean | nil
-    -- Prohibit continuation without necessary information.
-    if not ( player ) then return end
+    task.spawn(function()
+        -- Prohibit continuation without necessary information.
+        if not ( player ) then return end
 
-    -- Local Variables
-    local userId: number = player.UserId
-    local playerData: PlayerData = nil
+        -- Local Variables
+        local userId: number = player.UserId
+        local playerData: PlayerData = nil
 
-    -- Find player data!
-    PlayerStore:UpdateAsync(createDataKey(userId), function(oldData)
-        playerData = oldData
+        -- Find player data!
+        PlayerStore:UpdateAsync(createDataKey(userId), function(oldData)
+            playerData = oldData
+        end)
+
+        -- New player? Give them new data!
+        if not ( playerData ) then
+            playerData = Util:DeepCopy(DataFormat.Permanent)
+        end
+
+        -- Add player's data to server archive
+        ServerData[userId] = playerData
+        TemporaryData[userId] = Util:DeepCopy(DataFormat.Temporary)
+
+        -- Let player know their data has finished loading
+        player:SetAttribute("DataLoaded", true)
+
+        return true
     end)
-
-    -- New player? Give them new data!
-    if not ( playerData ) then
-        playerData = Util:DeepCopy(DataFormat.Permanent)
-    end
-
-    -- Add player's data to server archive
-    ServerData[userId] = playerData
-    TemporaryData[userId] = Util:DeepCopy(DataFormat.Temporary)
-
-    -- Let player know their data has finished loading
-    player:SetAttribute("DataLoaded", true)
-
-    return true
 end
 
 -- Runs when player is removing
@@ -144,11 +151,16 @@ function DataSystem.PlayerRemoving(player: Player): boolean | nil
     if not ( playerData ) then return end
 
     -- Find player plot
-    local plotId: Plot = PlotSystem.FindPlayerPlot(player)
+    local plotId: string = PlotSystem.FindPlayerPlot(player)
     if not ( plotId ) then return end
-    local plot = plotSpawns:FindFirstChild(plotId)
+    local plot: Plot = plotSpawns:FindFirstChild(plotId)
     if not ( plot ) then return end
     PlotSystem.SetPlotStatus(plot)
+
+    -- Delete physical plot
+    local physicalPlot: Model = plotsFolder:FindFirstChild(plotId)
+    if not ( physicalPlot ) then return end
+    physicalPlot:Destroy()
 
     -- Save player data
     PlayerStore:UpdateAsync(createDataKey(userId), function(oldData)

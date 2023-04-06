@@ -91,6 +91,8 @@ function PlotSystem.SetPlotStatus(plot: Plot, player: Player): boolean | nil
     -- Set plot to player
     if ( player ) then
         plot:SetAttribute("Owner", player.Name)
+
+        -- Set plot
         DataSystem:Set(player, true, "Plot", plot.Name)
     end
 

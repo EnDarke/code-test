@@ -37,4 +37,16 @@ export type Pad = {
     };
 }
 
+export type ToolGiver = {
+    Attributes: {
+        ToolName: string;
+    };
+}
+
+export type NewInstanceFunc = (string) -> Instance
+export type NewVector3Func = (x: number, y: number, z: number) -> Vector3
+export type NewCFrameFunc = (x: number, y: number, z: number) -> CFrame
+export type NewTweenInfoFunc = (time: number, easingstyle: EnumItem, easingdirection: EnumItem) -> TweenInfo
+export type NewRandomFunc = (min: number, max: number) -> Random
+
 return {}

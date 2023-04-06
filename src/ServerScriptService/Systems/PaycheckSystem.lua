@@ -19,6 +19,7 @@ local DataSystem = require(Parent.DataSystem)
 
 --\\ Replicated Modules //--
 local ReplicatedModules: Folder = ReplicatedStorage.Modules
+local Util = require(ReplicatedModules.Util)
 local Types = ReplicatedModules.Types
 
 --\\ Types //--
@@ -106,11 +107,8 @@ function PaycheckSystem.SetupMachine(paycheckMachine: Model, player: Player): ni
         if not ( playerThatTouched == player ) then return end
 
         -- Check Debounce
-        local timeNow: number = workspace:GetServerTimeNow()
-        local debounce: number | nil = DataSystem:Get(player, true, "Debounce")
-        if not ( debounce ) then return end
-        if not ( (timeNow - debounce) > 1 ) then return end
-        DataSystem:Set(player, true, "Debounce", timeNow)
+        local checkDebounce: boolean | nil = Util:CheckDebounce(playerThatTouched)
+        if not ( checkDebounce ) then return end
 
         -- Give player payout
         PaycheckSystem.RequestPaycheck(player)

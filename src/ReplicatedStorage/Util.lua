@@ -3,6 +3,27 @@
 -- Author: Alex/EnDarke
 -- Description: Utility functions for server and client code.
 
+--\\ Services //--
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+
+-- Server specific services
+local ServerScriptService = nil
+
+if ( RunService:IsServer() ) then
+	ServerScriptService = game:GetService("ServerScriptService")
+end
+
+--\\ Modules //--
+local Modules = ReplicatedStorage:WaitForChild("Modules")
+local Types = Modules.Types
+
+--\\ Types //--
+type Module = Types.Module
+
+--\\ Systems //--
+local DataSystem: Module = nil
+
 --\\ Module Code //--
 local Util = {}
 
@@ -46,6 +67,29 @@ function Util:SafeTeleport(object: Instance, location: CFrame)
 		warn(errMessage)
 		return
 	end)
+end
+
+-- Checks player debounces
+function Util:CheckDebounce(player: Player)
+	-- Prohibit continuation without necessary information.
+	if not ( player ) then return end
+
+	-- Check if this is being run on the server
+	if not ( RunService:IsServer() ) then return end
+
+	-- Find DataSystem or setup DataSystem
+	if not ( DataSystem ) then
+		DataSystem = require(ServerScriptService.Game.Systems.DataSystem)
+	end
+
+	-- Check Debounce
+	local timeNow: number = workspace:GetServerTimeNow()
+	local debounce: number | nil = DataSystem:Get(player, true, "Debounce")
+	if not ( debounce ) then return end
+	if not ( (timeNow - debounce) > 1 ) then return end
+	DataSystem:Set(player, true, "Debounce", timeNow)
+
+	return true
 end
 
 return Util

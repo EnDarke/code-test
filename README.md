@@ -7,8 +7,22 @@
 
 ### Final Thoughts
 - While I made quite a large some of changes, almost rewriting a lot of the code, I also reused much of the already set in stone codebase in terms of how pads and paycheck machines will function, where their data is stored, etc.
-- I tried not to make too drastic changes from the base product as it deemed to be highly inefficient and would've made this process take much longer.
+- I tried not to make too drastic changes from the base product as it deemed to be highly inefficient and would've made this process take much longer. I think it would be good to put in place something for replication to specific clients, this way the server doesn't have visuals to render in, best for server performance.
 - Overall, I think the game is far more clean, far more secure, and far more expandable. As expandability is also a highly important aspect to game development.
+
+### What did I do to put my personality to it?
+#### Tool Giver
+- I thought it would be quite unique to have a toolbase system added to the game for tool use!
+- Tool Giving system is also easily expandable for any tool that people want to add!
+
+#### Build Tool
+- I thought this was a pretty funny idea the fact that you could click anywhere to make a building appear there haha!
+- Buildings that are placed are set to random as it makes it feel more like magic in a way of the magic isn't always perfect.
+
+#### My thoughts on these additions
+- While I could've gone a more custom and very likely more secure system by creating my own tool system, I feel as though this keeps it simple and within the time limit allocations.
+- I feel like I over did this code test in so many different places, so I didn't really want to overcomplicate my own additions as much, but still wanted a little feature for people to enjoy!
+- DID WANT TO MENTION. Buildings DO NOT appear on the server. HOWEVER, it is replicated to all clients, this way clients can see all of the buildings, watch it grow (tween animated on the server) without any hits on the server, nor having to deal with network ownership of the asset and such as well.
 
 ### General
 #### Changes Implemented:

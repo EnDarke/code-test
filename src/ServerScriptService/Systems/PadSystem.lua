@@ -144,11 +144,8 @@ function PadSystem.SetupPad(pad: Pad, player: Player): nil
         if not ( playerThatTouched == player ) then return end
 
         -- Check Debounce
-        local timeNow: number = workspace:GetServerTimeNow()
-        local debounce: number | nil = DataSystem:Get(player, true, "Debounce")
-        if not ( debounce ) then return end
-        if not ( (timeNow - debounce) > 1 ) then return end
-        DataSystem:Set(player, true, "Debounce", timeNow)
+        local checkDebounce: boolean | nil = Util:CheckDebounce(playerThatTouched)
+        if not ( checkDebounce ) then return end
 
         -- Check to see if previous button was completed!
         if not ( dependency == pad ) then

@@ -34,7 +34,14 @@ function foreachModule(modules: {}, funcName: string, ...)
             if not ( ServerSystems[name][funcName] ) then continue end
 
             -- Run module function
-            ServerSystems[name][funcName](...)
+            if ( funcName == "PlayerAdded" ) then -- Filter player added so we can run task.spawns. This way player data can load the game without issue.
+                local tuple = ...
+                task.spawn(function()
+                    ServerSystems[name][funcName](tuple)
+                end)
+            else
+                ServerSystems[name][funcName](...)
+            end
         elseif ( module:IsA("ModuleScript") ) then
             -- Setup module
             ServerSystems[module.Name] = require(module)
@@ -49,7 +56,7 @@ function init()
 
     -- Apply player listeners
     for _, player: Player in ipairs(Players:GetPlayers()) do
-        foreachModule(ServerSystems, "PlayerAdded")
+        foreachModule(ServerSystems, "PlayerAdded", player)
     end
     Players.PlayerAdded:Connect(function(player: Player)
         foreachModule(ServerSystems, "PlayerAdded", player)

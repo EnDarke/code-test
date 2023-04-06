@@ -32,7 +32,7 @@ local padBillboard: BillboardGui = uiAssets:WaitForChild("PadBillboard")
 local PadHandler: Module = {}
 PadHandler._janitor = Janitor.new()
 
-function PadHandler.ForEachPad(pads: { Pad }, funcName: string, ...)
+function PadHandler.ForEachPad(pads: { Pad }, funcName: string, ...): nil
     -- Prohibit continuation without necessary information.
     if not ( funcName ) then return end
     if not ( PadHandler[funcName] ) then return end
@@ -44,7 +44,7 @@ function PadHandler.ForEachPad(pads: { Pad }, funcName: string, ...)
     end
 end
 
-function PadHandler.SetupBillboard(pad: Pad)
+function PadHandler.SetupBillboard(pad: Pad): nil
     -- Prohibit continuation without necessary information.
     if not ( pad ) then return end
     if not ( CollectionService:HasTag(pad, "Pad") ) then return end
