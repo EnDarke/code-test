@@ -29,6 +29,10 @@ type PlayerData = Types.PlayerData
 type Plot = Types.Plot
 type Pad = Types.Pad
 
+--\\ Remotes //--
+local Remotes: Folder = ReplicatedStorage.Remotes
+local PlaySFXFromName: RemoteEvent = Remotes.PlaySFXFromName
+
 --\\ Assets //--
 local scriptables: Folder = workspace.Scriptables
 local plotsFolder: Folder = scriptables.Plots
@@ -50,26 +54,6 @@ function PadSystem.ForEachPad(pads: { Pad }, funcName: string, ...): nil
     for _, pad: Pad in ipairs(pads) do
         -- Run Machine Function
         PadSystem[funcName](pad, ...)
-    end
-end
-
-function PadSystem.CheckIfPlayerOwnsPad(player: Player, pad: Pad, nextPad: Pad)
-    -- Prohibit continuation without necessary information.
-    if not ( player and pad ) then return end
-
-    -- Find player pad data
-    local padData: {} = DataSystem:Get(player, false, "PadsPurchased")
-    if not ( padData ) then return end
-
-    -- Check if pad is within purchased pads data
-    if ( table.find(padData, pad.Name) ) then
-        -- Force purchase the pad
-        PadSystem.OnPadPurchase(player, pad, pad:GetAttribute("TargetName"))
-
-        -- Setting dependent finished on next pad
-        nextPad:SetAttribute("DependentFinished", true)
-
-        return true
     end
 end
 
@@ -100,8 +84,31 @@ function PadSystem.OnPadPurchase(player: Player, pad: Pad, targetName: string): 
     Util:SafeTeleport(building, buildingCFrame)
     building.Parent = playerPlot.Buildings
 
+    -- Play sound effect!
+    PlaySFXFromName:FireClient(player, "Build")
+
     -- Delete pad
     pad:Destroy()
+end
+
+function PadSystem.CheckIfPlayerOwnsPad(player: Player, pad: Pad, nextPad: Pad)
+    -- Prohibit continuation without necessary information.
+    if not ( player and pad ) then return end
+
+    -- Find player pad data
+    local padData: {} = DataSystem:Get(player, false, "PadsPurchased")
+    if not ( padData ) then return end
+
+    -- Check if pad is within purchased pads data
+    if ( table.find(padData, pad.Name) ) then
+        -- Force purchase the pad
+        PadSystem.OnPadPurchase(player, pad, pad:GetAttribute("TargetName"))
+
+        -- Setting dependent finished on next pad
+        nextPad:SetAttribute("DependentFinished", true)
+
+        return true
+    end
 end
 
 function PadSystem.SetupPad(pad: Pad, player: Player): nil
@@ -155,13 +162,13 @@ function PadSystem.SetupPad(pad: Pad, player: Player): nil
         -- Check for player's funds and if it's enough!
         local playerMoney: number = DataSystem:Get(player, false, "Money")
         if not ( playerMoney ) then return end
-        if not ( playerMoney > price ) then return end
+        if not ( playerMoney >= price ) then return end
 
         -- Spawn buildings in!
         PadSystem.OnPadPurchase(player, pad, targetName)
 
         -- Take player's money!
-        DataSystem:Set(player, false, "Money", -price, true)
+        DataSystem:Set(player, false, "Money", -price, true, true)
 
         -- Save pads
         local padData: {} = DataSystem:Get(player, false, "PadsPurchased")

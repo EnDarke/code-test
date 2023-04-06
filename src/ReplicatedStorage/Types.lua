@@ -16,6 +16,10 @@ export type TemporaryData = {
     Debounce: number;
 }
 
+export type SoundData = {
+    SoundId: number;
+}
+
 export type Plot = {
     Taken: boolean;
     Owner: string;

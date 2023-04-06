@@ -63,7 +63,7 @@ function PadHandler.SetupBillboard(pad: Pad): nil
 end
 
 function PadHandler.Init(): nil
-    -- print("PadHandler Initiated!")
+    --print("PadHandler Initiated!")
 
     -- Run current pads with billboard setups
     PadHandler.ForEachPad(plotsFolder:GetDescendants(), "SetupBillboard")

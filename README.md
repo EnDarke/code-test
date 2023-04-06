@@ -1,6 +1,13 @@
 # Voldex Code Test
 
 ## Summary
+
+### Special Thanks
+I'd like to give special thanks to Ruizukun and Roblox for creating the 2 packages I used in the project!
+
+- Thanks to Ruizukun for Janitor!
+- Thanks to Roblox for TestEZ!
+
 ### Initial Thoughts
 - Game seems to only have ~200 lines of code total. A lot of the code is quite messy, a lot of vulnerabilities regarding code sequencing and client telling server what to do. Most systems may need to be refactored.
 - A lot of the general codebase for how things are stored are all over the place. It would be inefficient to do a complete revamp of the base system as unfortunate as that sounds. Might be worthful in the future overtime migrating to a more secure and organized database, but for just the code test and time constraints, I don't see it as necessary.
@@ -81,3 +88,8 @@
 ### Pads
 #### Changes Implemented:
 - Pads are listened in and automatically setup once they get added to the workspace.
+
+### Sounds
+#### Changes Implemented:
+- Added a PlaySFXFromName remote to send a signal for the client to play a certain song from the server.
+- Created a simple working sound system for sound effects to be played and removed, nothing too in-depth.

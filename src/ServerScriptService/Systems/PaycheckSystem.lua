@@ -67,7 +67,7 @@ function PaycheckSystem.RequestPaycheck(player: Player): boolean | nil
     if not ( givePlayerMoney ) then return end
 
     -- Reset PaycheckWithdrawalAmount
-    local resetPaycheck: boolean | nil = DataSystem:Set(player, false, "PaycheckWithdrawalAmount", 0)
+    local resetPaycheck: boolean | nil = DataSystem:Set(player, false, "PaycheckWithdrawalAmount", 0, false, true)
     if not ( resetPaycheck ) then return end
 
     -- Update remaining Paycheck Machines

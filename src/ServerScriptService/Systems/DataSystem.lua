@@ -34,7 +34,7 @@ local UpdateUI: RemoteEvent = Remotes.UpdateUI
 local RequestPlayerData: RemoteFunction = Remotes.RequestPlayerData
 
 --\\ System Setup //--
-local PlayerStore: DataStore = DataStoreService:GetDataStore("DEMO_PlayerStore")
+local PlayerStore: DataStore = DataStoreService:GetDataStore("Voldex_Code_Test")
 local ServerData: { [string]: PlayerData } = {}
 local TemporaryData: { [string]: TemporaryData } = {}
 local ClientDataSharingWhitelist: { string } = { "Money", "PaycheckWithdrawalAmount" }
@@ -76,7 +76,7 @@ function DataSystem:Get(player: Player, isTemporaryData: boolean, specific: any)
 end
 
 -- Sets player data type to inputted value
-function DataSystem:Set(player: Player, isTemporaryData: boolean, dataType: string, value: any, add: boolean): boolean | nil
+function DataSystem:Set(player: Player, isTemporaryData: boolean, dataType: string, value: any, add: boolean, isSound: boolean): boolean | nil
     -- Prohibit continuation without necessary information.
     if not ( player and dataType and value ) then return end
     if not ( player:GetAttribute("DataLoaded") ) then
@@ -97,7 +97,7 @@ function DataSystem:Set(player: Player, isTemporaryData: boolean, dataType: stri
 
     -- Let the player know!
     if ( table.find(ClientDataSharingWhitelist, dataType) ) then
-        UpdateUI:FireClient(player, dataType, value)
+        UpdateUI:FireClient(player, dataType, value, isSound)
     end
 
     return true

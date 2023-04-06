@@ -10,11 +10,12 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 --\\ Packages //--
-local Packages = ReplicatedStorage:WaitForChild("Packages")
+local Packages: Folder = ReplicatedStorage:WaitForChild("Packages")
 local Janitor = require(Packages.Janitor)
 
 --\\ Handlers //--
 local PaycheckMachineHandler: ModuleScript = require(Parent.PaycheckMachineHandler)
+local SoundHandler: ModuleScript = require(Parent.SoundHandler)
 
 --\\ Player //--
 local Player: Player = Players.LocalPlayer
@@ -34,22 +35,34 @@ local Label: TextLabel = MoneyFrame.Label
 local UserInterfaceHandler = {}
 UserInterfaceHandler._janitor = Janitor.new()
 
+function UserInterfaceHandler.RunSFX(isSound: boolean, sound: string): nil
+    -- Prohibit continuation without necessary information.
+    if not ( isSound and sound ) then return end
+    SoundHandler.PlaySFXFromName(sound)
+end
+
 -- Updates paycheck withdrawal amount
-function UserInterfaceHandler.PaycheckWithdrawalAmount(amount: number)
+function UserInterfaceHandler.PaycheckWithdrawalAmount(amount: number, isSound: boolean): nil
     -- Prohibit continuation without necessary information.
     if not ( amount ) then return end
     PaycheckMachineHandler.OnUpdateUIEvent(amount)
+
+    -- Play SFX
+    UserInterfaceHandler.RunSFX(isSound, "Money")
 end
 
-function UserInterfaceHandler.Money(amount: number)
+function UserInterfaceHandler.Money(amount: number, isSound: boolean): nil
     -- Prohibit continuation without necessary information.
     if not ( amount ) then return end
     Label.Text = amount
+
+    -- Play SFX
+    UserInterfaceHandler.RunSFX(isSound, "Coins")
 end
 
 -- Initialize module code
 function UserInterfaceHandler.Init(): nil
-    -- print("UserInterfaceHandler Initiated!")
+    --print("UserInterfaceHandler Initiated!")
 
     -- Grab player's current funds
     UserInterfaceHandler.Money(RequestCurrentMoney:InvokeServer())

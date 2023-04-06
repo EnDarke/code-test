@@ -77,7 +77,7 @@ end
 
 -- Initialize module code
 function PaycheckMachineHandler.Init(): nil
-    -- print("PaycheckMachineHandler Initiated!")
+    --print("PaycheckMachineHandler Initiated!")
 end
 
 return PaycheckMachineHandler

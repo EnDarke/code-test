@@ -3,10 +3,15 @@
 -- Author: Alex/EnDarke
 -- Description:  Handles builder tool on the client.
 
+local Parent = script.Parent
+
 --\\ Services //--
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
+
+--\\ Handlers //--
+local SoundHandler: ModuleScript = require(Parent:WaitForChild("SoundHandler"))
 
 --\\ Packages //--
 local Packages: Folder = ReplicatedStorage:WaitForChild("Packages")
@@ -38,6 +43,9 @@ local tweenInfo: NewTweenInfoFunc = TweenInfo.new
 local Player = Players.LocalPlayer
 local Mouse = Player:GetMouse()
 
+--\\ Constants //--
+local BUILDING_LIFETIME = 5
+
 --\\ Assets //--
 local scriptables: Folder = workspace:WaitForChild("Scriptables")
 local buildingReplication: Folder = scriptables.Buildings
@@ -47,6 +55,7 @@ local buildables: Folder = assetFolder.Buildables
 
 --\\ Tweens //--
 local numberTweenInfo: TweenInfo = tweenInfo(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+local numberTweenInfoReverse: TweenInfo = tweenInfo(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.In)
 
 --\\ Local Utility Functions //--
 local function calcBuildingPlacement(building: Model, position: Vector3)
@@ -61,7 +70,7 @@ local BuilderToolHandler: Module = {}
 BuilderToolHandler._janitor = Janitor.new()
 
 -- Replicates the building placements for clients
-function BuilderToolHandler.ReplicateBuilds(position: Vector3, randomNumber: number): boolean | nil
+function BuilderToolHandler.ReplicateBuilds(position: Vector3, randomNumber: number): nil
     -- Prohibit continuation without necessary information.
     if not ( position and randomNumber ) then return end
 
@@ -73,12 +82,16 @@ function BuilderToolHandler.ReplicateBuilds(position: Vector3, randomNumber: num
     building:PivotTo(cframe(calcBuildingPlacement(building, position)))
     building.Parent = buildingReplication
 
+    -- Play build sound
+    SoundHandler.PlaySFXFromName("Build")
+
     -- Prep tween
     local newNumberValue: NumberValue = instance("NumberValue")
     newNumberValue.Value = 0
 
     -- Create and play tween
     local numberTween: Tween = TweenService:Create(newNumberValue, numberTweenInfo, { Value = 1 })
+    local numberTweenReverse: Tween = TweenService:Create(newNumberValue, numberTweenInfoReverse, { Value = 0.01 })
     numberTween:Play()
 
     -- Listen for number change
@@ -86,16 +99,25 @@ function BuilderToolHandler.ReplicateBuilds(position: Vector3, randomNumber: num
         building:ScaleTo(value)
     end))
 
-    -- Wait for completion and clean up!
+    -- Wait for first completion and get rid of
     numberTween.Completed:Wait()
     numberTween:Destroy()
-    newNumberValue:Destroy()
 
-    return true
+    -- Building lifetime
+    task.wait(BUILDING_LIFETIME)
+
+    -- Close out tween!
+    numberTweenReverse:Play()
+
+    -- Wait for completion and clean up!
+    numberTweenReverse.Completed:Wait()
+    numberTweenReverse:Destroy()
+    newNumberValue:Destroy()
+    building:Destroy()
 end
 
 
-function BuilderToolHandler.RequestBuild()
+function BuilderToolHandler.RequestBuild(): nil
     -- Find player character
     local character = Player.Character or Player.CharacterAppearanceLoaded:Wait()
     -- Find tool in player character
@@ -104,11 +126,14 @@ function BuilderToolHandler.RequestBuild()
 
     -- Get mouse position and start!
     local mousePosition: Vector3 = Mouse.Hit.Position
-    RequestBuild:InvokeServer(mousePosition)
+    local requestSuccess: boolean = RequestBuild:InvokeServer(mousePosition)
+    if not ( requestSuccess ) then return end
+
+    SoundHandler.PlaySFXFromName("Build")
 end
 
-function BuilderToolHandler.Init()
-    -- print("BuilderToolHandler Initiated!")
+function BuilderToolHandler.Init(): nil
+    --print("BuilderToolHandler Initiated!")
 
     -- Add listeners!
     BuilderToolHandler._janitor:Add(Mouse.Button1Down:Connect(BuilderToolHandler.RequestBuild)) -- When computer player clicks, fire this.
