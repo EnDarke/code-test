@@ -33,6 +33,7 @@ I'd like to give special thanks to Ruizukun and Roblox for creating the 2 packag
 
 ### General
 #### Changes Implemented:
+- Excited to say that the game is now multiplayer as welL! Up to 8 players!
 - Cleaned up codebase to be structured in a much more collective manner.
 - Added custom types, makes it easier  to know what objects are doing what and what information they hold!
 - Server and client scripts now have a unionized system for running .Init() and .PlayerAdded()/.PlayerRemoving() functions. This leaves for a much cleaner and optimized codebase.
