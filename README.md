@@ -96,6 +96,12 @@ I'd like to give special thanks to Ruizukun and Roblox for creating the 2 packag
 - Added a PlaySFXFromName remote to send a signal for the client to play a certain song from the server.
 - Created a simple working sound system for sound effects to be played and removed, nothing too in-depth.
 
+#### All Sound Effects:
+- PaycheckMachine receiving noise
+- Coin noise from money spending
+- Building noise from building placement
+(If sounds don't work, likely permissions aren't set)
+
 ## Things I Would Change About The Codebase I Implemented
 #### Changes I'd Make:
 - More in-depth systems rather than short-end, not as customizable based systems where we have unlimited posibility with what goes on. (e.g. tool system being a simple tool giver and roblox backpack versus player backpack with custom equips and custom tool usage events).
